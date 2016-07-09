@@ -3,6 +3,8 @@
 // Graphics library by ladyada/adafruit with init code from Rossum
 // MIT license
 
+// Modified for SPFD5408 by Joao Lopes
+
 #ifndef _ADAFRUIT_TFTLCD_H_
 #define _ADAFRUIT_TFTLCD_H_
 
@@ -12,12 +14,16 @@
  #include "WProgram.h"
 #endif
 
-#include <Adafruit_GFX.h>
+// *** SPFD5408 change -- Begin
+#include <SPFD5408_Adafruit_GFX.h>
+// -- End
 
 // **** IF USING THE LCD BREAKOUT BOARD, COMMENT OUT THIS NEXT LINE. ****
 // **** IF USING THE LCD SHIELD, LEAVE THE LINE ENABLED:             ****
 
+// *** SPFD5408 change -- Begin
 //#define USE_ADAFRUIT_SHIELD_PINOUT 1
+// -- End
 
 class Adafruit_TFTLCD : public Adafruit_GFX {
 

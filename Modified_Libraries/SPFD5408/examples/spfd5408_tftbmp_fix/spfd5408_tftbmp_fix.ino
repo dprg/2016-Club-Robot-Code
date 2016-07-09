@@ -1,12 +1,13 @@
 // BMP-loading example specifically for the TFTLCD breakout board.
 // If using the Arduino shield, use the tftbmp_shield.pde sketch instead!
-// If using an Arduino Mega make sure to use its hardware SPI pins, OR make
-// sure the SD library is configured for 'soft' SPI in the file Sd2Card.h.
+// If using an Arduino Mega, make sure the SD library is configured for
+// 'soft' SPI in the file Sd2Card.h.
+
+///////  ***** Not Tested yet on SPFD5408 - next version I do it
 
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_TFTLCD.h> // Hardware-specific library
 #include <SD.h>
-#include <SPI.h>
 
 // The control pins for the LCD can be assigned to any digital or
 // analog pins...but we'll use the analog pins as this allows us to
@@ -43,48 +44,47 @@ Adafruit_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, A4);
 void setup()
 {
   Serial.begin(9600);
-
+   digitalWrite(35, HIGH);         //I use this on mega for LCD Backlight
   tft.reset();
 
   uint16_t identifier = tft.readID();
 
   if(identifier == 0x9325) {
-    Serial.println(F("Found ILI9325 LCD driver"));
+    progmemPrintln(PSTR("Found ILI9325 LCD driver"));
   } else if(identifier == 0x9328) {
-    Serial.println(F("Found ILI9328 LCD driver"));
+    progmemPrintln(PSTR("Found ILI9328 LCD driver"));
   } else if(identifier == 0x7575) {
-    Serial.println(F("Found HX8347G LCD driver"));
-  } else if(identifier == 0x9341) {
-    Serial.println(F("Found ILI9341 LCD driver"));
-  } else if(identifier == 0x8357) {
-    Serial.println(F("Found HX8357D LCD driver"));
+    progmemPrintln(PSTR("Found HX8347G LCD driver"));
   } else {
-    Serial.print(F("Unknown LCD driver chip: "));
+    progmemPrint(PSTR("Unknown LCD driver chip: "));
     Serial.println(identifier, HEX);
-    Serial.println(F("If using the Adafruit 2.8\" TFT Arduino shield, the line:"));
-    Serial.println(F("  #define USE_ADAFRUIT_SHIELD_PINOUT"));
-    Serial.println(F("should appear in the library header (Adafruit_TFT.h)."));
-    Serial.println(F("If using the breakout board, it should NOT be #defined!"));
-    Serial.println(F("Also if using the breakout, double-check that all wiring"));
-    Serial.println(F("matches the tutorial."));
+    progmemPrintln(PSTR("If using the Adafruit 2.8\" TFT Arduino shield, the line:"));
+    progmemPrintln(PSTR("  #define USE_ADAFRUIT_SHIELD_PINOUT"));
+    progmemPrintln(PSTR("should appear in the library header (Adafruit_TFT.h)."));
+    progmemPrintln(PSTR("If using the breakout board, it should NOT be #defined!"));
+    progmemPrintln(PSTR("Also if using the breakout, double-check that all wiring"));
+    progmemPrintln(PSTR("matches the tutorial."));
     return;
   }
 
   tft.begin(identifier);
 
-  Serial.print(F("Initializing SD card..."));
+  progmemPrint(PSTR("Initializing SD card..."));
   if (!SD.begin(SD_CS)) {
-    Serial.println(F("failed!"));
+    progmemPrintln(PSTR("failed!"));
     return;
   }
-  Serial.println(F("OK!"));
+  progmemPrintln(PSTR("OK!"));
 
   bmpDraw("woof.bmp", 0, 0);
-  delay(1000);
+  delay(10000);
+  bmpDraw("dprglogo.bmp", 0, 0);
+  delay(10000);
 }
 
 void loop()
 {
+  /*
   for(int i = 0; i<4; i++) {
     tft.setRotation(i);
     tft.fillScreen(0);
@@ -93,6 +93,12 @@ void loop()
     }
     delay(1000);
   }
+  */
+  bmpDraw("woof.bmp", 0, 0);
+  delay(5000);
+  bmpDraw("dprglogo.bmp", 0, 0);
+  delay(5000);
+  
 }
 
 // This function opens a Windows Bitmap (BMP) file and
@@ -126,32 +132,32 @@ void bmpDraw(char *filename, int x, int y) {
   if((x >= tft.width()) || (y >= tft.height())) return;
 
   Serial.println();
-  Serial.print(F("Loading image '"));
+  progmemPrint(PSTR("Loading image '"));
   Serial.print(filename);
   Serial.println('\'');
   // Open requested file on SD card
   if ((bmpFile = SD.open(filename)) == NULL) {
-    Serial.println(F("File not found"));
+    progmemPrintln(PSTR("File not found"));
     return;
   }
 
   // Parse BMP header
   if(read16(bmpFile) == 0x4D42) { // BMP signature
-    Serial.println(F("File size: ")); Serial.println(read32(bmpFile));
+    progmemPrint(PSTR("File size: ")); Serial.println(read32(bmpFile));
     (void)read32(bmpFile); // Read & ignore creator bytes
     bmpImageoffset = read32(bmpFile); // Start of image data
-    Serial.print(F("Image Offset: ")); Serial.println(bmpImageoffset, DEC);
+    progmemPrint(PSTR("Image Offset: ")); Serial.println(bmpImageoffset, DEC);
     // Read DIB header
-    Serial.print(F("Header size: ")); Serial.println(read32(bmpFile));
+    progmemPrint(PSTR("Header size: ")); Serial.println(read32(bmpFile));
     bmpWidth  = read32(bmpFile);
     bmpHeight = read32(bmpFile);
     if(read16(bmpFile) == 1) { // # planes -- must be '1'
       bmpDepth = read16(bmpFile); // bits per pixel
-      Serial.print(F("Bit Depth: ")); Serial.println(bmpDepth);
+      progmemPrint(PSTR("Bit Depth: ")); Serial.println(bmpDepth);
       if((bmpDepth == 24) && (read32(bmpFile) == 0)) { // 0 = uncompressed
 
         goodBmp = true; // Supported BMP format -- proceed!
-        Serial.print(F("Image size: "));
+        progmemPrint(PSTR("Image size: "));
         Serial.print(bmpWidth);
         Serial.print('x');
         Serial.println(bmpHeight);
@@ -215,7 +221,7 @@ void bmpDraw(char *filename, int x, int y) {
         if(lcdidx > 0) {
           tft.pushColors(lcdbuffer, lcdidx, first);
         } 
-        Serial.print(F("Loaded in "));
+        progmemPrint(PSTR("Loaded in "));
         Serial.print(millis() - startTime);
         Serial.println(" ms");
       } // end goodBmp
@@ -223,7 +229,7 @@ void bmpDraw(char *filename, int x, int y) {
   }
 
   bmpFile.close();
-  if(!goodBmp) Serial.println(F("BMP format not recognized."));
+  if(!goodBmp) progmemPrintln(PSTR("BMP format not recognized."));
 }
 
 // These read 16- and 32-bit types from the SD card file.
@@ -246,3 +252,15 @@ uint32_t read32(File f) {
   return result;
 }
 
+// Copy string from flash to serial port
+// Source string MUST be inside a PSTR() declaration!
+void progmemPrint(const char *str) {
+  char c;
+  while(c = pgm_read_byte(str++)) Serial.print(c);
+}
+
+// Same as above, with trailing newline
+void progmemPrintln(const char *str) {
+  progmemPrint(str);
+  Serial.println();
+}

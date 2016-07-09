@@ -2,8 +2,14 @@
 // CONFIGURED FOR EITHER THE TFT SHIELD OR THE BREAKOUT BOARD.
 // SEE RELEVANT COMMENTS IN Adafruit_TFTLCD.h FOR SETUP.
 
-#include <Adafruit_GFX.h>    // Core graphics library
-#include <Adafruit_TFTLCD.h> // Hardware-specific library
+// Modified for SPFD5408 Library by Joao Lopes
+// and touch instead serial !!!!
+// Too much modifications, so not: begins e ends 
+// Version 0.9.2 - Rotation for Mega and screen initial
+
+#include <SPFD5408_Adafruit_GFX.h>    // Core graphics library
+#include <SPFD5408_Adafruit_TFTLCD.h> // Hardware-specific library
+#include <SPFD5408_TouchScreen.h>     // Touch library
 
 // The control pins for the LCD can be assigned to any digital or
 // analog pins...but we'll use the analog pins as this allows us to
@@ -43,52 +49,81 @@ Adafruit_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
 // a simpler declaration can optionally be used:
 // Adafruit_TFTLCD tft;
 
+// Calibrates value
+
+#define SENSIBILITY 300
+#define MINPRESSURE 10
+#define MAXPRESSURE 1000
+
+//These are the pins for the shield!
+#define YP A1 
+#define XM A2 
+#define YM 7  
+#define XP 6 
+
+// Calibrate values
+
+#define TS_MINX 125
+#define TS_MINY 85
+#define TS_MAXX 965
+#define TS_MAXY 905
+
+// Init TouchScreen:
+
+TouchScreen ts = TouchScreen(XP, YP, XM, YM, SENSIBILITY);
+
 void setup(void) {
-  Serial.begin(9600);
-  Serial.println(F("TFT LCD test"));
-
-#ifdef USE_ADAFRUIT_SHIELD_PINOUT
-  Serial.println(F("Using Adafruit 2.8\" TFT Arduino Shield Pinout"));
-#else
-  Serial.println(F("Using Adafruit 2.8\" TFT Breakout Board Pinout"));
-#endif
-
+  
   tft.reset();
+  tft.begin(0x9341); // SDFP5408
 
-  uint16_t identifier = tft.readID();
+  tft.setRotation(0); // Need for the Mega, please changed for your choice or rotation initial
 
-  if(identifier == 0x9325) {
-    Serial.println(F("Found ILI9325 LCD driver"));
-  } else if(identifier == 0x9328) {
-    Serial.println(F("Found ILI9328 LCD driver"));
-  } else if(identifier == 0x7575) {
-    Serial.println(F("Found HX8347G LCD driver"));
-  } else if(identifier == 0x9341) {
-    Serial.println(F("Found ILI9341 LCD driver"));
-  } else if(identifier == 0x8357) {
-    Serial.println(F("Found HX8357D LCD driver"));
-  } else {
-    Serial.print(F("Unknown LCD driver chip: "));
-    Serial.println(identifier, HEX);
-    Serial.println(F("If using the Adafruit 2.8\" TFT Arduino shield, the line:"));
-    Serial.println(F("  #define USE_ADAFRUIT_SHIELD_PINOUT"));
-    Serial.println(F("should appear in the library header (Adafruit_TFT.h)."));
-    Serial.println(F("If using the breakout board, it should NOT be #defined!"));
-    Serial.println(F("Also if using the breakout, double-check that all wiring"));
-    Serial.println(F("matches the tutorial."));
-    return;
-  }
+  // Border
 
-  tft.begin(identifier);
+  drawBorder();
+  
+  // Initial screen
+  
+  tft.setCursor (55, 50);
+  tft.setTextSize (3);
+  tft.setTextColor(RED);
+  tft.println("SPFD5408");
+  tft.setCursor (65, 85);
+  tft.println("Library");
+  tft.setCursor (25, 150);
+  tft.setTextSize (2);
+  tft.setTextColor(BLACK);
+  tft.println("Test of rotation");
 
-  tft.fillScreen(BLACK);
+  // Wait touch
 
-  Serial.println(F("This is a test of the rotation capabilities of the TFT library!"));
-  Serial.println(F("Press <SEND> (or type a character) to advance"));
+  waitOneTouch(true);
+
+  // Draw border
+
+  drawBorder();
+
+  tft.setTextSize (1);
+  tft.setTextColor(BLACK);
+  tft.setCursor (20, 80);
+  tft.println("This is a test of the rotation");
+  tft.setCursor (20, 100);
+  tft.println("capabilities of the TFT library!");
+  tft.setCursor (20, 160);
+  tft.println("Touch to advance each test");
+
+  // Wait touch
+
+  waitOneTouch(true);
+
 }
 
 void loop(void) {
-  rotatePixel();
+
+  // Tests 
+  
+  //rotatePixel();
   rotateLine();
   rotateFastline();
   rotateDrawrect();
@@ -96,12 +131,23 @@ void loop(void) {
   rotateDrawcircle();
   rotateFillcircle();
   rotateText();
+
+  // Complete
+
+  drawBorder();
+
+  tft.setCursor (35, 50);
+  tft.setTextSize (3);
+  tft.setTextColor(RED);
+  tft.println("Completed");
+
+  waitOneTouch(true);
+  
 }
 
 void rotateText() {
   for (uint8_t i=0; i<4; i++) {
-    tft.fillScreen(BLACK);
-    Serial.println(tft.getRotation(), DEC);
+    tft.fillScreen(WHITE);
 
     tft.setCursor(0, 30);
     tft.setTextColor(RED);
@@ -117,8 +163,7 @@ void rotateText() {
     tft.setTextSize(4);
     tft.print(1234.567);
 
-    while (!Serial.available());
-    Serial.read();  Serial.read();  Serial.read();
+    waitOneTouch(true); // Wait touch
 
     tft.setRotation(tft.getRotation()+1);
   }
@@ -126,27 +171,24 @@ void rotateText() {
 
 void rotateFillcircle(void) {
   for (uint8_t i=0; i<4; i++) {
-    tft.fillScreen(BLACK);
-    Serial.println(tft.getRotation(), DEC);
+    tft.fillScreen(WHITE);
 
     tft.fillCircle(10, 30, 10, YELLOW);
 
-    while (!Serial.available());
-    Serial.read();  Serial.read();  Serial.read();
-
     tft.setRotation(tft.getRotation()+1);
+    
+    waitOneTouch(true); // Wait touch
+
   }
 }
 
 void rotateDrawcircle(void) {
   for (uint8_t i=0; i<4; i++) {
-    tft.fillScreen(BLACK);
-    Serial.println(tft.getRotation(), DEC);
+    tft.fillScreen(WHITE);
 
     tft.drawCircle(10, 30, 10, YELLOW);
 
-    while (!Serial.available());
-    Serial.read();  Serial.read();  Serial.read();
+    waitOneTouch(true); // Wait touch
 
     tft.setRotation(tft.getRotation()+1);
   }
@@ -154,13 +196,11 @@ void rotateDrawcircle(void) {
 
 void rotateFillrect(void) {
   for (uint8_t i=0; i<4; i++) {
-    tft.fillScreen(BLACK);
-    Serial.println(tft.getRotation(), DEC);
+    tft.fillScreen(WHITE);
 
     tft.fillRect(10, 20, 10, 20, GREEN);
 
-    while (!Serial.available());
-    Serial.read();  Serial.read();  Serial.read();
+    waitOneTouch(true); // Wait touch
 
     tft.setRotation(tft.getRotation()+1);
   }
@@ -168,13 +208,11 @@ void rotateFillrect(void) {
 
 void rotateDrawrect(void) {
   for (uint8_t i=0; i<4; i++) {
-    tft.fillScreen(BLACK);
-    Serial.println(tft.getRotation(), DEC);
+    tft.fillScreen(WHITE);
 
     tft.drawRect(10, 20, 10, 20, GREEN);
 
-    while (!Serial.available());
-    Serial.read();  Serial.read();  Serial.read();
+    waitOneTouch(true); // Wait touch
 
     tft.setRotation(tft.getRotation()+1);
   }
@@ -182,14 +220,11 @@ void rotateDrawrect(void) {
 
 void rotateFastline(void) {
   for (uint8_t i=0; i<4; i++) {
-    tft.fillScreen(BLACK);
-    Serial.println(tft.getRotation(), DEC);
-
+    tft.fillScreen(WHITE);
     tft.drawFastHLine(0, 20, tft.width(), RED);
     tft.drawFastVLine(20, 0, tft.height(), BLUE);
 
-    while (!Serial.available());
-    Serial.read();  Serial.read();  Serial.read();
+    waitOneTouch(true); // Wait touch
 
     tft.setRotation(tft.getRotation()+1);
   }
@@ -197,12 +232,11 @@ void rotateFastline(void) {
 
 void rotateLine(void) {
   for (uint8_t i=0; i<4; i++) {
-    tft.fillScreen(BLACK);
-    Serial.println(tft.getRotation(), DEC);
+    tft.fillScreen(WHITE);
 
     tft.drawLine(tft.width()/2, tft.height()/2, 0, 0, RED);
-    while (!Serial.available());
-    Serial.read();  Serial.read();  Serial.read();
+
+    waitOneTouch(true); // Wait touch
 
     tft.setRotation(tft.getRotation()+1);
   }
@@ -210,14 +244,63 @@ void rotateLine(void) {
 
 void rotatePixel(void) {
   for (uint8_t i=0; i<4; i++) {
-    tft.fillScreen(BLACK);
-    Serial.println(tft.getRotation(), DEC);
-
+    tft.fillScreen(WHITE);
+    
     tft.drawPixel(10,20, RED);
-    while (!Serial.available());
-    Serial.read();  Serial.read();  Serial.read();
+
+    waitOneTouch(true); // Wait touch
 
     tft.setRotation(tft.getRotation()+1);
   }
+}
+
+TSPoint waitOneTouch(boolean showMessage) {
+
+  // wait 1 touch to exit function
+
+  uint8_t save = 0;
+
+  if (showMessage) {
+
+    save = tft.getRotation(); // Save it
+    tft.setRotation(0); // Show in normal  
+    
+    tft.setCursor (80, 250);
+    tft.setTextSize (1);
+    tft.setTextColor(BLACK);
+    tft.println("Touch to proceed");
+
+  }
+
+  // Wait a touch
+  
+  TSPoint p;
+  
+  do {
+    p= ts.getPoint(); 
+  
+    pinMode(XM, OUTPUT); //Pins configures again for TFT control
+    pinMode(YP, OUTPUT);
+  
+  } while((p.z < MINPRESSURE )|| (p.z > MAXPRESSURE));
+
+  if (showMessage) {
+    tft.setRotation(save);
+  }
+  
+  return p;
+}
+
+void drawBorder () {
+
+  // Draw a border
+
+  uint16_t width = tft.width() - 1;
+  uint16_t height = tft.height() - 1;
+  uint8_t border = 10;
+
+  tft.fillScreen(RED);
+  tft.fillRect(border, border, (width - border * 2), (height - border * 2), WHITE);
+  
 }
 

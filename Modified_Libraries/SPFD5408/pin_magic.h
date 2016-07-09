@@ -49,6 +49,8 @@
 // Due dig. pin :  40  39  38  37  36  35  34  33
 // Due port/pin : PC8 PC7 PC6 PC5 PC4 PC3 PC2 PC1 (one contiguous PORT. -ish…)
 
+// Modified for SPFD5408 by Joao Lopes to work with SPFD5408
+
 // Pixel read operations require a minimum 400 nS delay from RD_ACTIVE
 // to polling the input pins.  At 16 MHz, one machine cycle is 62.5 nS.
 // This code burns 7 cycles (437.5 nS) doing nothing; the RJMPs are
@@ -162,14 +164,36 @@
 
  #else // Mega w/Breakout board
 
+// *** SPFD5408 change -- Begin
+
+/* Original code commented
   #define write8inline(d)   { PORTA = (d); WR_STROBE; }
   #define read8inline(result) { \
     RD_ACTIVE;                  \
     DELAY7;                     \
     result = PINA;              \
     RD_IDLE; }
-  #define setWriteDirInline() DDRA  = 0xff
-  #define setReadDirInline()  DDRA  = 0
+*/
+
+// Changed to works with SPFD5408, based in post by Buhosoft (http://forum.arduino.cc/index.php?topic=292777.0)
+
+#define write8inline(d) {                          \
+PORTE = (PORTE & B11001111) | ((d << 2) & B00110000); \
+PORTE = (PORTE & B11110111) | ((d >> 2) & B00001000); \
+PORTG = (PORTG & B11011111) | ((d << 1) & B00100000); \
+PORTH = (PORTH & B11100111) | ((d >> 3) & B00011000); \
+PORTH = (PORTH & B10011111) | ((d << 5) & B01100000); \
+WR_STROBE; }
+#define read8inline(result) {                       \
+RD_ACTIVE;                                        \
+DELAY7;                                           \
+result = ((PINH & B00011000) << 3) | ((PINE & B00001000) << 2) | ((PING & B00100000) >> 1) |((PINE & B00110000) >> 2) | ((PINH & B01100000) >> 5); \
+RD_IDLE; }
+
+#define setWriteDirInline() { DDRE |=  B00111000; DDRG |=  B00100000; DDRH |= B01111000;}
+#define setReadDirInline() { DDRE &=  ~B00111000; DDRG &=  ~B00100000; DDRH &= ~B01111000;}
+
+// -- End
 
  #endif
 

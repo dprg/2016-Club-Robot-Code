@@ -4,6 +4,10 @@
 // Graphics library by ladyada/adafruit with init code from Rossum
 // MIT license
 
+// Modified for SPFD5408 by Joao Lopes to work with SPFD5408
+// Version 0.9.1 - First Beta
+//         0.9.2 - unique pin_magic por uno, leonardo and mega
+
 #if defined(__SAM3X8E__)
 	#include <include/pio.h>
     #define PROGMEM
@@ -13,9 +17,16 @@
 #ifdef __AVR__
 	#include <avr/pgmspace.h>
 #endif
+
+// *** SPFD5408 change -- Begin
+
+#include "SPFD5408_Adafruit_TFTLCD.h"
+
+// -- End
+
 #include "pins_arduino.h"
 #include "wiring_private.h"
-#include "Adafruit_TFTLCD.h"
+
 #include "pin_magic.h"
 
 //#define TFTWIDTH   320
@@ -293,6 +304,11 @@ void Adafruit_TFTLCD::begin(uint16_t id) {
     delay(150);
     writeRegister8(ILI9341_DISPLAYON, 0);
     delay(500);
+	// *** SPFD5408 change -- Begin
+	// Not tested yet
+	//writeRegister8(ILI9341_INVERTOFF, 0);
+	//delay(500);
+    // *** SPFD5408 change -- End
     setAddrWindow(0, 0, TFTWIDTH-1, TFTHEIGHT-1);
     return;
 
@@ -873,50 +889,60 @@ uint16_t Adafruit_TFTLCD::readPixel(int16_t x, int16_t y) {
 // Ditto with the read/write port directions, as above.
 uint16_t Adafruit_TFTLCD::readID(void) {
 
-  uint8_t hi, lo;
+  // *** SPFD5408 change -- Begin
+  return 0x9341; // Identification of SPFD5408
+  // *** SPFD5408 change -- End
 
-  /*
-  for (uint8_t i=0; i<128; i++) {
-    Serial.print("$"); Serial.print(i, HEX);
-    Serial.print(" = 0x"); Serial.println(readReg(i), HEX);
-  }
-  */
+  // *** SPFD5408 change -- Begin
+  // Original code commented
+   
+//  uint8_t hi, lo;
+//
+//  /*
+//  for (uint8_t i=0; i<128; i++) {
+//    Serial.print("$"); Serial.print(i, HEX);
+//    Serial.print(" = 0x"); Serial.println(readReg(i), HEX);
+//  }
+//  */
+//
+//  if (readReg(0x04) == 0x8000) { // eh close enough
+//    // setc!
+//    /*
+//      Serial.println("!");
+//      for (uint8_t i=0; i<254; i++) {
+//      Serial.print("$"); Serial.print(i, HEX);
+//      Serial.print(" = 0x"); Serial.println(readReg(i), HEX);
+//      }
+//    */
+//    writeRegister24(HX8357D_SETC, 0xFF8357);
+//    delay(300);
+//    //Serial.println(readReg(0xD0), HEX);
+//    if (readReg(0xD0) == 0x990000) {
+//      return 0x8357;
+//    }
+//  }
+//
+//  uint16_t id = readReg(0xD3);
+//  if (id == 0x9341) {
+//    return id;
+//  }
+//
+//  CS_ACTIVE;
+//  CD_COMMAND;
+//  write8(0x00);
+//  WR_STROBE;     // Repeat prior byte (0x00)
+//  setReadDir();  // Set up LCD data port(s) for READ operations
+//  CD_DATA;
+//  read8(hi);
+//  read8(lo);
+//  setWriteDir();  // Restore LCD data port(s) to WRITE configuration
+//  CS_IDLE;
+//
+//  id = hi; id <<= 8; id |= lo;
+//  return id;
+    
+    // *** SPFD5408 change -- End
 
-  if (readReg(0x04) == 0x8000) { // eh close enough
-    // setc!
-    /*
-      Serial.println("!");
-      for (uint8_t i=0; i<254; i++) {
-      Serial.print("$"); Serial.print(i, HEX);
-      Serial.print(" = 0x"); Serial.println(readReg(i), HEX);
-      }
-    */
-    writeRegister24(HX8357D_SETC, 0xFF8357);
-    delay(300);
-    //Serial.println(readReg(0xD0), HEX);
-    if (readReg(0xD0) == 0x990000) {
-      return 0x8357;
-    }
-  }
-
-  uint16_t id = readReg(0xD3);
-  if (id == 0x9341) {
-    return id;
-  }
-
-  CS_ACTIVE;
-  CD_COMMAND;
-  write8(0x00);
-  WR_STROBE;     // Repeat prior byte (0x00)
-  setReadDir();  // Set up LCD data port(s) for READ operations
-  CD_DATA;
-  read8(hi);
-  read8(lo);
-  setWriteDir();  // Restore LCD data port(s) to WRITE configuration
-  CS_IDLE;
-
-  id = hi; id <<= 8; id |= lo;
-  return id;
 }
 
 uint32_t Adafruit_TFTLCD::readReg(uint8_t r) {
