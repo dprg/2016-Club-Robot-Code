@@ -294,7 +294,7 @@ void BotScreen::CheckForButtonPress(TSPoint p)
       /////////////////////////////////////////////// TOGGLE ///////////////////////////////////////////////
       if (buttonMeta[b].buttonType == Toggle) {
         buttonMeta[b].screen_button.press(true);
-        //buttonMeta[b].buttonFcb = !buttonMeta[b].buttonFcb;
+
         if(buttonMeta[b].navFunc != nullptr) {
           buttonMeta[b].buttonFcb = buttonMeta[b].navFunc(buttonMeta[b].screen_button.getLabel());
         }
