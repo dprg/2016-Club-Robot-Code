@@ -1,22 +1,11 @@
-# ClubKit_Arduino
+**Dallas Personal Robotics Club**
 Base Robotics code for the DPRG Club Robot kit
 
- ________          ________        ________          ________       
-|\   ___ \        |\   __  \      |\   __  \        |\   ____\      
-\ \  \_|\ \       \ \  \|\  \     \ \  \|\  \       \ \  \___|      
- \ \  \ \\ \       \ \   ____\     \ \   _  _\       \ \  \  ___    
-  \ \  \_\\ \       \ \  \___|      \ \  \\  \|       \ \  \|\  \   
-   \ \_______\       \ \__\          \ \__\\ _\        \ \_______\  
-    \|_______|        \|__|           \|__|\|__|        \|_______|  
-                                                                    
-                                                                    
+**Version History** 
+
 #DPRG Club Robot Display Drivers  
-	Author: Steve Edwards  
-	Versions:   
-		0.1.0 - Beta 1: First public beta - July 9, 2016  
+    0.1.0 - Beta 1: First public beta - October 11, 2016  - Author: Steve Edwards
   
-defines.h - Global defines, calibrated offsets, and resource id's  
-bottypes.h - Global enum and struct declarations  
-botscreen.h - BotScreen library headers  
-botscreen.cpp - BotScreen library implementation  
+#DPRG Club Robot Navigation driver examples  
+    0.1.0 - Beta 1: First public beta - October 11, 2016  - Author: Doug Paradis
  
