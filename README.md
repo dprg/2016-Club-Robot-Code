@@ -1,4 +1,4 @@
-**Dallas Personal Robotics Club**
+**Dallas Personal Robotics Club**  
 Base Robotics code for the DPRG Club Robot kit
 
 **Version History** 
