@@ -23,6 +23,8 @@ This repository contains code that provides basic functionality to the DPRG club
 
 -   Hobby Servo (claw)
 
+The example code compiles without issue on Arduino IDE versions 1.6.5-r5 through 1.6.9. There is an issue with Arduino IDE versions 1.6.10 through 1.6.12 that is still to be resolved.
+
 ----------
 **Navigation**  
 The example code uses differential drive kinematics and the quadrature outputs from the club robot's motor encoders to provide position and heading information. A desired robot path is defined in an two array set of way points; one for x and one for y coordinates. The arrays allow up to 15 way points.
