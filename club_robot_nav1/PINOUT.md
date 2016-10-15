@@ -63,7 +63,7 @@ It is assumed that the switch and fuse module are wired as shown in the DPRG Clu
 |Power Switch - Red| Fuse Module, Motor Shield Pwr (+),UEB input (+)|
 |Fuse Module - Black|Motor Shield Pwr (-),UEB input (-)|
 |UBEC - output| 5v/Gnd buss module|
-----------
+-----------
 **Version History** 
   
     0.1.0 - Beta 1: First public beta - October 14, 2016  - Author: Doug Paradis
