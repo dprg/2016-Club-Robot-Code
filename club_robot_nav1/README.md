@@ -23,7 +23,7 @@ This repository contains code that provides basic functionality to the DPRG club
 
 -   Hobby Servo (claw)
 
--  
+----------
 **Navigation**  
 The example code uses differential drive kinematics and the quadrature outputs from the club robot's motor encoders to provide position and heading information. A desired robot path is defined in an two array set of way points; one for x and one for y coordinates. The arrays allow up to 15 way points.
 
@@ -44,7 +44,7 @@ The club robot is configured with two ultrasonic sensors to measure obstacles in
 - Slow down and operate claw to capture can directly in front of robot.  
 
 **Bumper sensor**  
-The robot's bumper has 4 normally closed switches, 2 switches per side. The switches on each side are wired in series. When the bumper comes in contact with an obstacle, one or more of the switches will open. This signal is detected by the processor and a bumper routine is run. The example code's bumper routine simply cause the robot to stop when an obstacle is hit.
+The robot's bumper has 4 normally closed switches, 2 switches per side. The switches on each side are wired in series. When the bumper comes in contact with an obstacle, one or more of the switches will open. This signal is detected by the processor and a bumper routine is run. The example code's bumper routine simply causes the robot to stop when an obstacle is hit.
 
 **Hobby Servo (claw)**  
 The robot is fitted with a 3D printed claw that is driven by a hobby servo. The example code uses the softservo Arduino library to control the servo. Routines are provided to open and close the claw.
