@@ -1,7 +1,7 @@
 # Club Robot Ardunio Mega Pinout #
 
 
-----------
+---------- 
 
 This files contains the pinout and connections for the DPRG club robot (ver. 2016 - Arduino Mega).Pinouts are provided for:
 -   Motors / Encoders
