@@ -7,23 +7,15 @@ This repository contains code that provides basic functionality to the DPRG club
 
 
 -   Autonomous navigation using a path of way points and odometry
-
-
 -   Motor control (PID / encoders)
-
-
 -   Light-weight cooperative round-robin multitasking executive
-
-
 -   Ultrasonic sensor
-
-
 -   Bumper sensor
-
-
 -   Hobby Servo (claw)
 
 The example code compiles without issue on Arduino IDE versions 1.6.5-r5 through 1.6.9. There is an issue with Arduino IDE versions 1.6.10 through 1.6.12 that is still to be resolved.
+
+[Video of Club Robot Running Example Software](https://youtu.be/S3tb57kWcNU "Video of Example Code on Club Robot")
 
 ----------
 **Navigation**  
