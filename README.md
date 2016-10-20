@@ -8,4 +8,5 @@ Base Robotics code for the DPRG Club Robot kit
   
 #DPRG Club Robot Navigation driver examples  
     0.1.0 - Beta 1: First public beta - October 11, 2016  - Author: Doug Paradis
+    0.1.1 - Beta 2: Bug fixes         - October 20, 2016  - Author: Doug Paradis
  
