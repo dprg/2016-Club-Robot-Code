@@ -21,7 +21,7 @@ The example code compiles without issue on Arduino IDE versions 1.6.5-r5 through
 
 ----------
 **Navigation**  
-The example code uses differential drive kinematics and the quadrature outputs from the club robot's motor encoders to provide position and heading information. A desired robot path is defined in an two array set of way points; one for x and one for y coordinates. The arrays allow up to 15 way points.
+The example code uses differential drive kinematics and the quadrature outputs from the club robot's motor encoders to provide position and heading information. A desired robot path is defined in a two array set of way points; one for x and one for y coordinates. The arrays allow up to 15 way points.
 
 **Motor Control**  
 Motor control is achieved by driving the robot's H-bridge board with a PI controller routine for each motor. The PI controller uses a setpoint signal that combines a desired count of ticks per period and a value derived from heading error (a P controller). The input signal is the actual count of encoder ticks per period.
