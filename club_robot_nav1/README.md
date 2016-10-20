@@ -13,6 +13,8 @@ This repository contains code that provides basic functionality to the DPRG club
 -   Bumper sensor
 -   Hobby Servo (claw)
 
+The robot's display and display controller are not used by the example code.
+
 The example code compiles without issue on Arduino IDE versions 1.6.5-r5 through 1.6.9. There is an issue with Arduino IDE versions 1.6.10 through 1.6.12 that is still to be resolved.
 
 [Video of Club Robot Running Example Software](https://youtu.be/S3tb57kWcNU "Video of Example Code on Club Robot")
@@ -22,10 +24,10 @@ The example code compiles without issue on Arduino IDE versions 1.6.5-r5 through
 The example code uses differential drive kinematics and the quadrature outputs from the club robot's motor encoders to provide position and heading information. A desired robot path is defined in an two array set of way points; one for x and one for y coordinates. The arrays allow up to 15 way points.
 
 **Motor Control**  
-Motor control is achieved by driving the robot's H-bridge board with a PI controller routine for each motor. The PI controller uses a setpoint signal that combines a desired count of ticks per period and a value derived from heading error (also a PI controller). The input signal is the actual count of encoder ticks per period.
+Motor control is achieved by driving the robot's H-bridge board with a PI controller routine for each motor. The PI controller uses a setpoint signal that combines a desired count of ticks per period and a value derived from heading error (a P controller). The input signal is the actual count of encoder ticks per period.
 
 **Cooperative Round-Robin Multitasking Executive (LMX)**  
-LMX is a cooperative round-robin multitasking executive, developed by David Anderson (DPRG member) is used to allow multiple cooperative tasks to run in parallel.
+LMX is a cooperative round-robin multitasking executive developed by David Anderson (DPRG member). It is used to allow multiple cooperative tasks to run in parallel.
 
 **Ultrasonic Sensors**  
 The club robot is configured with two ultrasonic sensors to measure obstacles in front of the robot. Routines in the code allow for several behaviors based on the sensor results:
@@ -59,3 +61,4 @@ LMX, a cooperative round-robin multitasking executive, developed by David Anders
 **Version History** 
   
     0.1.0 - Beta 1: First public beta - October 11, 2016  - Author: Doug Paradis
+    0.1.1 - Beta 2: Bug fixes         - October 20, 2016  - Author: Doug Paradis

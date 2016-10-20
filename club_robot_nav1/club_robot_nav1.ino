@@ -71,7 +71,7 @@ int main()
 
     pid_count = 0; current = 0;
 
-	create_task("SENSORS",sensors,20,MINSTACK);  //40
+	create_task("SENSORS",sensors,20,MINSTACK * 2);  //40
 	create_task("CLAW",claw,45,MINSTACK);        //45
 	create_task("MOVE",move,10,MINSTACK*2);        //25 //20
     create_task("IDLE",cpu_idle,0,MINSTACK);

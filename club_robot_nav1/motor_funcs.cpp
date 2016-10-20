@@ -1,7 +1,7 @@
 /************************************************************
 *
 * motor_funcs.cpp
-* version: 20161011-0           Doug Paradis
+*  version: 20161020-0           Doug Paradis
 * Motor/ Encoder/PID functions for DPRG Club Robot 2016.
 *
 *  Motor/Encoder functions are derived from:
@@ -12,8 +12,8 @@
 *      enc => 3292.4 pulse/rev
 *      wheel is 100mm => c = pi*dia = 31.4159cm
 *      pulse/cm = 3292.4pulse/rev / 31.4259cm/rev = 104.8pulse/cm 
-*      if period of measure is 20ms (i.e., 50periods/sec)
-*         speed in cm/sec = cm / 50period * 104.8pulse/cm = 2.096 pulse/period
+*      if period of measure is 10ms (i.e., 100 periods/sec)
+*         speed in cm/sec = cm / 100 period * 104.8 pulse/cm = 1.048 pulse/period
 *
 ************************************************************/
 
@@ -36,6 +36,8 @@ double pid_output[2];
 
 double kp[2] = {3,3};   // these are not optimized 
 double ki[2] = {5,5}; 
+//double kp[2] = {3,3};   // these are not optimized
+//double ki[2] = {16,16};
 double kd[2] = {0,0};
 
 	
@@ -48,8 +50,10 @@ void init_pids ()
 {
 	right_mtr_pid.SetSampleTime(10);
 	right_mtr_pid.SetMode(AUTOMATIC);
+	//right_mtr_pid.SetOutputLimits(20,240);   //min, max
 	left_mtr_pid.SetSampleTime(10);
 	left_mtr_pid.SetMode(AUTOMATIC);
+	//left_mtr_pid.SetOutputLimits(20,240);   //min, max
 
 }
 
@@ -131,9 +135,18 @@ void motorGo(uint8_t motor, uint8_t direct, uint8_t pwm)
 /* --------------------------------------------------------------- */
 /* motor command utilities - taken from work by D. Anderson        */
 /* --------------------------------------------------------------- */
-/* clip value to min and max */
+/* clip int value to min and max */
 
 int clip(int val,int min,int max) 
+{
+	if (val > max) return max;
+	if (val < min) return min;
+	return val;
+}
+
+/* clip float value to min and max */
+
+int clip_f(float val,float min,float max)
 {
 	if (val > max) return max;
 	if (val < min) return min;

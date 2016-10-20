@@ -1,5 +1,7 @@
 /******************************************************************
 *  motor_funcs.h
+*  version: 20161020-0           Doug Paradis
+*
 ******************************************************************/
 #ifndef MOTOR_FUNCS_H
 #define  MOTOR_FUNCS_H
@@ -51,6 +53,7 @@ void init_motor_driver_shield();
 void motorOff(int motor);
 void motorGo(uint8_t motor, uint8_t direct, uint8_t pwm);
 int clip(int val,int min,int max);
+int clip_f(float val,float min,float max);
 int slew(int from, int to, int rate);
 
 

@@ -1,7 +1,7 @@
 /******************************************************************
 *
 *  ultrasonic_funcs.h
-*  version: 20161011-0           Doug Paradis
+*  version: 20161020-0           Doug Paradis
 *  Ultrasonic sensor functions for DPRG Club Robot 2016.
 *
 ******************************************************************/
@@ -25,7 +25,7 @@ typedef struct us_sens_t {
 extern us_sensor *ptr_us_R;
 extern us_sensor *ptr_us_L;
 extern volatile uint8_t usonic_flg;
-extern volatile uint32_t start_time, end_time;
+extern volatile uint32_t us_start_time, us_end_time;
 
 // function prototypes
 void init_ultrasonic (us_sensor *ptr_usensorR, us_sensor *ptr_usensorL);

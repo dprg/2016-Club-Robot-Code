@@ -1,7 +1,7 @@
 ﻿/******************************************************************
 *
 *  ultrasonic_funcs.cpp
-*  version: 20161011-0           Doug Paradis
+*  version: 20161020-0           Doug Paradis
 *  Ultrasonic sensor functions for DPRG Club Robot 2016.
 *
 ******************************************************************/
@@ -15,7 +15,7 @@
 // Variables
 volatile uint8_t usonic_flg;
 volatile uint8_t portk_hist;
-volatile uint32_t start_time, end_time; 
+volatile uint32_t us_start_time, us_end_time; 
 
 us_sensor us_R;
 us_sensor *ptr_us_R = &us_R;
@@ -33,10 +33,10 @@ ISR(PCINT2_vect)
 	
 	if (changed_bits & (1 << PK0)) {          // PCINT16 changed
 		if (portk_hist < PINK){               // rising edge
-			start_time = micros();
+			us_start_time = micros();
 		}
 		else {                                // falling edge
-			end_time = micros();
+			us_end_time = micros();
 			usonic_flg = 1;
 		}
 		portk_hist = PINK;
@@ -44,10 +44,10 @@ ISR(PCINT2_vect)
 
 	if (changed_bits & (1 << PK1)) {          // PCINT17 changed
 		if (portk_hist < PINK){               // rising edge
-			start_time = micros();
+			us_start_time = micros();
 		}
 		else {                                // falling edge
-			end_time = micros();
+			us_end_time = micros();
 			usonic_flg = 3;
 		}
 		portk_hist = PINK;
@@ -100,8 +100,8 @@ void measure_us_dist(us_sensor *ptr_us_sensor)
 	float dist = 0;               //cm
 	
 	ATOMIC_BLOCK (ATOMIC_RESTORESTATE) {
-		 ptr_us_sensor->start_time = start_time;
-		 ptr_us_sensor->end_time = end_time;		
+		 ptr_us_sensor->start_time = us_start_time;
+		 ptr_us_sensor->end_time = us_end_time;		
 	}
 	
 	delta_time = ptr_us_sensor->end_time - ptr_us_sensor->start_time;

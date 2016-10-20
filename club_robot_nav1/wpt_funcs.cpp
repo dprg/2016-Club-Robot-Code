@@ -1,7 +1,7 @@
 /******************************************************************
 *
 *  wpt_funcs.cpp
-*  version: 20161011-0           Doug Paradis
+*  version: 20161020-0           Doug Paradis
 *  Waypoint functions for DPRG Club Robot 2016.
 *
 ******************************************************************/
@@ -29,8 +29,15 @@ uint8_t slow_movement_flg = OFF;
 
 // allows for a 15 segment path and a end of path value
 // first element must be 0 for both arrays (units = cm)
-float waypoint_x[16] = {0.0,  0.0,200.0,200.0,0.0,LAST_ELEM};   // CCW 1 meter sq  
-float waypoint_y[16] = {0.0,200.0,200.0,  0.0,0.0,LAST_ELEM};  
+
+//float waypoint_x[16] = {0.0,  0.0,100.0,100.0,0.0,100.0,    0,0,100.0,0,LAST_ELEM};   //complex pattern
+//float waypoint_y[16] = {0.0,100.0,100.0,  0.0,0.0,100.0,100.0,0,  0.0,0,LAST_ELEM};
+
+float waypoint_x[16] = {0.0,  0.0,100.0,100.0,0.0,LAST_ELEM};   // CCW 1 meter sq
+float waypoint_y[16] = {0.0,100.0,100.0,  0.0,0.0,LAST_ELEM};
+
+//float waypoint_x[16] = {0.0,  0.0,200.0,200.0,0.0,LAST_ELEM};   // CCW 2 meter sq  
+//float waypoint_y[16] = {0.0,200.0,200.0,  0.0,0.0,LAST_ELEM};  
 	
 //float waypoint_x[16] = {0.0,-100.0,-100.0,  0.0,0.0,LAST_ELEM};   // CW 1 meter sq
 //float waypoint_y[16] = {0.0,   0.0, 100.0,100.0,0.0,LAST_ELEM}; 
