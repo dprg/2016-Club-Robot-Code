@@ -10,57 +10,39 @@
 #define HELPFUL_DEFINES_H
 
 #ifndef LAST_ELEM
-	#define LAST_ELEM 9999
+#define LAST_ELEM 9999
 #endif
 
 #ifndef ON
-	#define ON 1
+#define ON 1
 #endif
 
 #ifndef OFF
-	#define OFF 0
-#endif	
-	
+#define OFF 0
+#endif
+
 #ifndef STOP
-	#define STOP 0
+#define STOP 0
 #endif
 
 #ifndef R_MTR
-	#define R_MTR 0
+#define R_MTR 0
 #endif
 
 #ifndef L_MTR
-	#define L_MTR 1
+#define L_MTR 1
 #endif
 
 #ifndef OPEN
-	#define OPEN 0
+#define OPEN 0
 #endif
 
 #ifndef CLOSE
-	#define CLOSE 1
+#define CLOSE 1
 #endif
-	
-	
+
 #ifndef ARR_LENGTH
-	#define ARR_LENGTH(x) (sizeof(x)/sizeof(*(x)))
+#define ARR_LENGTH(x) (sizeof(x) / sizeof(*(x)))
 #endif
 
-
-
-
-
-
 #endif
-
-
-
-
-
-
-
-
-
-
-
-

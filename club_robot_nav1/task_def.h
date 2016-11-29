@@ -22,13 +22,15 @@
 #include "helpful_defines.h"
 
 #define VERSION "BMARK-2.1.3 (clubRobot-0.0.1)"
-#define WAIT(d)  { wake_after(d); }
+#define WAIT(d)        \
+    {                  \
+        wake_after(d); \
+    }
 
-#if (MACHINE == MACH_AVR)  /* Mega2560, Mega328 Teensy-LC */ 
+#if (MACHINE == MACH_AVR) /* Mega2560, Mega328 Teensy-LC */
 #define PRINTF Serial3.println
 #define SPRINTF sprintf
-#endif	
-	
+#endif
 
 // function prototypes
 

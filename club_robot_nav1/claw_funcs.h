@@ -16,7 +16,7 @@ extern SoftwareServo claw_servo;
 extern uint8_t claw_closed;
 
 //function prototypes
-void init_claw ();
+void init_claw();
 void close_claw();
 void open_claw();
 

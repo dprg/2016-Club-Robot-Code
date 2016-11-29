@@ -8,7 +8,6 @@
 #ifndef BUMPER_FUNCS_H
 #define BUMPER_FUNCS_H
 
-
 #include <arduino.h>
 
 // externs
