@@ -10,8 +10,16 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 // Init TouchScreen: & TFT object
-Adafruit_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
-TouchScreen ts = TouchScreen(XP, YP, XM, YM, SENSIBILITY);
+//Adafruit_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
+
+#include <SPI.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_ILI9341.h>
+#include <Adafruit_STMPE610.h>
+#include <SD.h>
+
+Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
+Adafruit_STMPE610 ts = Adafruit_STMPE610(STMPE_CS);
 
 //
 // Constructor
@@ -33,11 +41,25 @@ BotScreen::~BotScreen()
 // Initialization
 void BotScreen::Init()
 {
-  // initialize the touch screen
-  _tft->reset();  
-  _tft->begin(0x9341);
-  _tft->setRotation(1); // Button Right is the initial rotation
 
+  if (!ts.begin()) {
+    Serial.println("Couldn't start touchscreen controller");
+    while (1);
+  }
+  Serial.println("Touchscreen started");
+  
+  // initialize the touch screen
+  _tft->begin();
+  _tft->fillScreen(ILI9341_BLACK);
+  _tft->setRotation(1);
+  yield();
+
+  Serial.print("Initializing SD card...");
+  if (!SD.begin(SD_CS)) {
+    Serial.println("failed!");
+  }
+  Serial.println("OK!");
+  
   InitializeSettings();
 
   // Get initial width and height
@@ -61,10 +83,6 @@ int16_t BotScreen::height(void) const {
 // add a button
 void BotScreen::AddButton(const ScreenButton& button)
 {
-  uint16_t mod, line, column, nextButton;
-  char label[10];
-  char value[18];
-  
   switch (button.type)
   {
     case Edit:
@@ -228,7 +246,6 @@ void BotScreen::AddTopButton(const ScreenButton& button)
 {
   uint16_t mod, line, column, nextButton;
   char label[10];
-  char value[18];
 
   nextButton = GetTopButtonCount();
   
@@ -257,7 +274,6 @@ void BotScreen::AddBottomButton(const ScreenButton& button)
 {
   uint16_t mod, line, column, nextButton;
   char label[10];
-  char value[18];
     
   nextButton = GetBottomButtonCount();
   
@@ -281,15 +297,11 @@ void BotScreen::AddBottomButton(const ScreenButton& button)
 
 //
 // Check each button to see if it was pressed
-void BotScreen::CheckForButtonPress(TSPoint p)
+void BotScreen::CheckForButtonPress(TS_Point p)
 {
-  // map to current rotation coordinates
-  uint16_t x = mapXPoint(p);
-  uint16_t y = mapYPoint(p);
-  
   // iterate through all top buttons
   for (uint8_t b=0; b<GetTopButtonCount(); b++) {
-    if (buttonMeta[b].screen_button.contains(x, y)) {
+    if (buttonMeta[b].screen_button.contains(p.x, p.y)) {
 
       /////////////////////////////////////////////// TOGGLE ///////////////////////////////////////////////
       if (buttonMeta[b].buttonType == Toggle) {
@@ -327,7 +339,7 @@ void BotScreen::CheckForButtonPress(TSPoint p)
         }
 
         buttonMeta[b].screen_button.drawButton(true);
-        delay(50);
+ //       delay(50);
         buttonMeta[b].screen_button.drawButton(false);
         
       /////////////////////////////////////////////// VALUE ///////////////////////////////////////////////
@@ -338,14 +350,14 @@ void BotScreen::CheckForButtonPress(TSPoint p)
       } else if(buttonMeta[b].buttonType == Action) {
         buttonMeta[b].screen_button.press(true);
         buttonMeta[b].screen_button.drawButton(true);
-        delay(150);
+//        delay(150);
         buttonMeta[b].screen_button.drawButton(false);
 
       /////////////////////////////////////////////// NAVIGATION ///////////////////////////////////////////////
       } else if(buttonMeta[b].buttonType == Navigation) {
         buttonMeta[b].screen_button.press(true);
         buttonMeta[b].screen_button.drawButton(true);
-        delay(150);
+//        delay(150);
         buttonMeta[b].screen_button.drawButton(false);
 
         if(buttonMeta[b].navFunc != nullptr) {
@@ -363,7 +375,7 @@ void BotScreen::CheckForButtonPress(TSPoint p)
 
   // Check to see if our Navigation buttons were pressed
   for (uint8_t b=0; b<GetBottomButtonCount(); b++) {
-    if (navMeta[b].screen_button.contains(x, y)) {
+    if (navMeta[b].screen_button.contains(p.x, p.y)) {
       if (navMeta[b].buttonType == Toggle) {
         navMeta[b].screen_button.press(true);
         navMeta[b].buttonFcb = !navMeta[b].buttonFcb;
@@ -379,7 +391,7 @@ void BotScreen::CheckForButtonPress(TSPoint p)
         }
         
         navMeta[b].screen_button.drawButton(true);
-        delay(350);
+//        delay(350);
         navMeta[b].screen_button.drawButton(false);
       }
     }
@@ -413,7 +425,7 @@ void BotScreen::DrawButtons()
 
 //
 // initialize our settings array
-bool BotScreen::InitializeSettings()
+void BotScreen::InitializeSettings()
 {
   for(int i=0;i<SETTING_SLOTS;i++) {
     memset(_settings[i].key, '\0', 10);
@@ -436,7 +448,6 @@ int BotScreen::SaveSetting(char* key, int value, byte precision)
   }
 
   // create new setting
-  uint8_t freePos = -1;
   for(int i=0;i<SETTING_SLOTS;i++) {
     if(strcmp(key, "") == 0) {
       strncpy(_settings[i].key, key, 10);      
@@ -446,7 +457,7 @@ int BotScreen::SaveSetting(char* key, int value, byte precision)
     }
   }
 
-  int i = 1/0;
+  //int i = 1/0;
   return SETTING_NOSLOT_AVAILALBE;
 }
 
@@ -522,18 +533,32 @@ void BotScreen::DrawBorder(uint16_t borderSize, uint16_t color)
 
 //
 // wait for user touch on screen
-TSPoint BotScreen::waitOneTouch()
+TS_Point BotScreen::waitOneTouch()
 {
-	TSPoint p;
-	
-	do {
-		p= _ts->getPoint(); 
-	
-		pinMode(XM, OUTPUT); //Pins configures again for TFT control
-		pinMode(YP, OUTPUT);
-	
-	} while((p.z < MINPRESSURE )|| (p.z > MAXPRESSURE));
-	
+  TS_Point p; 
+
+  boolean istouched = false;
+  do {
+    istouched = _ts->touched();
+    yield();  
+    yield();
+  } while(!istouched);   
+
+  p = _ts->getPoint(); 
+  yield();
+  
+  Serial.print("\tWidth = "); Serial.print(_tft->width());Serial.print(",\tHeight = "); Serial.println(_tft->height());
+  Serial.print("X = "); Serial.print(p.x); Serial.print("\tY = "); Serial.println(p.y);
+
+  p.x = map(p.x, TS_MINX, TS_MAXX, 0, tft.height());
+  p.y = map(p.y, TS_MINY, TS_MAXY, 0, tft.width());
+
+  Serial.print("mapped+X = "); Serial.print(p.x);Serial.print("\tmapped_Y = "); Serial.println(p.y);
+
+  if (((p.y-PENRADIUS) > 0) && ((p.y+PENRADIUS) < tft.width())) {
+    tft.fillCircle(p.y, p.x, PENRADIUS, ILI9341_RED);
+  }
+  
 	return p;
 }
 
@@ -622,22 +647,6 @@ void BotScreen::println(int val)
 }
 
 //
-// Map the coordinate X  
-uint16_t BotScreen::mapXPoint(TSPoint p)
-{
-  uint16_t x = map(p.y, TS_MINY, TS_MAXY, 0, _width);
-  return x;
-}
-
-//
-// Map the coordinate Y
-uint16_t BotScreen::mapYPoint(TSPoint p) 
-{
-  uint16_t y = map(p.x, TS_MINX, TS_MAXX, 0, _height);
-  return y;
-}
-
-//
 // Show the splash screen
 void BotScreen::ShowSplashScreen(char* title, char* builder, char* robotName, int majorVer, int minorVer)
 {
@@ -699,5 +708,6 @@ void BotScreen::UpdateStatus(int value, int textSize, StatusLine line)
 int BlankButtonNavFunc(char* label)
 {
   // do nothing
+  return 0;
 }
 

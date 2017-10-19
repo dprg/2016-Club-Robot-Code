@@ -8,19 +8,42 @@
 #ifndef _DEFINES_H
 #define _DEFINES_H
 
-// The control pins for the LCD can be assigned to any digital or
-// analog pins...but we'll use the analog pins as this allows us to
-// double up the pins with the touch screen (see the TFT paint example).
-#define LCD_CS                      A3 // Chip Select goes to Analog 3
-#define LCD_CD                      A2 // Command/Data goes to Analog 2
-#define LCD_WR                      A1 // LCD Write goes to Analog 1
-#define LCD_RD                      A0 // LCD Read goes to Analog 0
-#define LCD_RESET                   A4 // Can alternately just connect to Arduino's reset pin
-
-// For Arduino Uno/Duemilanove, etc
-//  connect the SD card with DI going to pin 11, DO going to pin 12 and SCK going to pin 13 (standard)
-//  Then pin 10 goes to CS (or whatever you have set up)
-#define SD_CS                       10     // Set the chip select line to whatever you use (10 doesnt conflict with the library)
+#ifdef ESP8266
+   #define STMPE_CS 16
+   #define TFT_CS   0
+   #define TFT_DC   15
+   #define SD_CS    2
+#endif
+#ifdef ESP32
+   #define STMPE_CS 32
+   #define TFT_CS   15
+   #define TFT_DC   33
+   #define SD_CS    14
+#endif
+#if defined (__AVR_ATmega32U4__) || defined(ARDUINO_SAMD_FEATHER_M0) || defined (__AVR_ATmega328P__) 
+   #define STMPE_CS 6
+   #define TFT_CS   9
+   #define TFT_DC   10
+   #define SD_CS    5
+#endif
+#ifdef TEENSYDUINO
+   #define TFT_DC   10
+   #define TFT_CS   4
+   #define STMPE_CS 3
+   #define SD_CS    8
+#endif
+#ifdef ARDUINO_STM32_FEATHER
+   #define TFT_DC   PB4
+   #define TFT_CS   PA15
+   #define STMPE_CS PC7
+   #define SD_CS    PC5
+#endif
+#ifdef ARDUINO_NRF52_FEATHER /* BSP 0.6.5 and higher! */
+   #define TFT_DC   11
+   #define TFT_CS   31
+   #define STMPE_CS 30
+   #define SD_CS    27
+#endif
 
 // Assign human-readable names to some common 16-bit color values:
 #define BLACK                       0x0000
@@ -41,17 +64,18 @@
 #define BUTTON_TEXTCOLOR            YELLOW
 #define BLANK_BUTTON                BACKGROUND_COLOR
 
-//These are the pins for the shield!
-#define YP                          A3  // must be an analog pin, use "An" notation!
-#define XM                          A2  // must be an analog pin, use "An" notation!
-#define YM                          9   // can be a digital pin
-#define XP                          8   // can be a digital pin
+////These are the pins for the shield!
+//#define YP                          A3  // must be an analog pin, use "An" notation!
+//#define XM                          A2  // must be an analog pin, use "An" notation!
+//#define YM                          9   // can be a digital pin
+//#define XP                          8   // can be a digital pin
 
-// Calibrated values
-#define TS_MINX                     200  //100   //200
-#define TS_MINY                     118   //118
-#define TS_MAXX                     950  //900   //817
-#define TS_MAXY                     822   //822
+#define PENRADIUS 3
+
+#define TS_MINX 100
+#define TS_MAXX 3800
+#define TS_MINY 100
+#define TS_MAXY 3750
 
 // Calibrates value
 #define SENSIBILITY                 300
@@ -139,7 +163,7 @@
 
 // Error Codes
 #define SETTING_SLOTS                1
-#define SETTING_NOSLOT_AVAILALBE    -32001
-#define SETTING_NOTFOUND            -32000
+#define SETTING_NOSLOT_AVAILALBE    -16001
+#define SETTING_NOTFOUND            -16000
 
 #endif //_DEFINES_H

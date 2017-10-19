@@ -5,14 +5,15 @@
 // Author Steve Edwards
 //
 ///////////////////////////////////////////////////////////////////////////////
-#include <SPFD5408_TouchScreen.h>     // Touch library
+///////////////////////////////////////////////////////////////////////////////
 #include "defines.h"
 #include "botscreen.h"                // DPRG Bot Screen Library
+///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
 //
 // Display version information (update at least minor version# if you make changes)
-uint16_t major_version = 1;
+uint16_t major_version = 2;
 uint16_t minor_version = 0;
 
 // Mode variables
@@ -69,7 +70,7 @@ bool fcbPidLeft;
 bool fcbPidRight;
 SonarSetting sonarLeft;
 SonarSetting sonarRight;
-
+elapsedMillis sinceLastPointTested;
 //
 // Initialization
 void setup() 
@@ -77,7 +78,7 @@ void setup()
   touchDisplay.Init();
   
   // ready to GO!  
-  touchDisplay.ShowSplashScreen("DPRG Robot 2016", "Steve Edwards", "Havoc", major_version, minor_version);  
+  touchDisplay.ShowSplashScreen("DPRG Robot 2017", "Steve Edwards", "Havoc", major_version, minor_version);  
   saveresult = touchDisplay.SaveSetting("PID_EN", false, 0);
 
   pids[0].K = 200;
@@ -157,12 +158,12 @@ void error_no_mode_mapped()
     touchDisplay.ClearTopButtons();
     touchDisplay.ClearBottomButtons();
     
-    #define PID_NAV_CNT 1
-    ButtonSetup navButtons[PID_NAV_CNT] { 
+    const uint8_t pid_nav_cnt = 4;
+    ButtonSetup navButtons[pid_nav_cnt] { 
       {"Back", Navigation, false, nav_return_to_initial_mode} 
     };
  
-    for(uint16_t b;b<PID_NAV_CNT;b++) {
+    for(uint16_t b;b<pid_nav_cnt;b++) {
       ScreenButton button;
       strncpy(button.label, navButtons[b].label, sizeof(navButtons[b].label));
       button.type = navButtons[b].buttonType;
@@ -177,18 +178,17 @@ void error_no_mode_mapped()
     
     while (mode == ERROR_NO_MODE_MAPPED)
     {
-      TSPoint p;
-  
-      delay(250); //debounce
-      p = touchDisplay.waitOneTouch(); // Wait touch
+      TS_Point p = touchDisplay.waitOneTouch(); // Wait touch
   
       if (p.y < (TS_MINY-5)) {
         nextMode(PARENTS_BASE, CNT_PARENT_MODES);
       }
-      
-      touchDisplay.CheckForButtonPress(p);
-    }
 
+      if(sinceLastPointTested > 250){
+        touchDisplay.CheckForButtonPress(p);
+        sinceLastPointTested = 0;
+      }
+    }
 }
 
 void BuildScreen(char* title, ButtonSetup *topButtons, byte topButtonCount, ButtonSetup *navigationButtons, byte navButtonCount, uint16_t currentMode)
@@ -205,7 +205,7 @@ void BuildScreen(char* title, ButtonSetup *topButtons, byte topButtonCount, Butt
 
   // top buttons
   if(topButtons != nullptr) {
-    for(uint16_t b;b<topButtonCount;b++) {
+    for(uint16_t b=0;b<topButtonCount;b++) {
       ScreenButton button;
       strncpy(button.label, topButtons[b].label, sizeof(topButtons[b].label));
       button.type = topButtons[b].buttonType;
@@ -237,8 +237,9 @@ void BuildScreen(char* title, ButtonSetup *topButtons, byte topButtonCount, Butt
 
   touchDisplay.UpdateStatus("Mode", 1, Line1);
   touchDisplay.UpdateStatus(mode, 1, Line2);
-  
-  checkButtonPressed(currentMode);
+
+  sinceLastPointTested = 0;
+  checkButtonPressed(currentMode);  
 }
 
 // executes CheckForButtonPress(p) unless parent mode change is requested
@@ -246,17 +247,18 @@ void checkButtonPressed(uint16_t currentMode)
 {
   while (mode == currentMode)
   {
-    TSPoint p;
-  
-    delay(250); //debounce
-    p = touchDisplay.waitOneTouch(); // Wait touch
-  
-    if (p.y < (TS_MINY-5)) {
+    
+    TS_Point p = touchDisplay.waitOneTouch(); // Wait touch
+    
+/*    if (p.y < (TS_MINY-5)) {
       if(currentMode > PARENTS_BASE + CNT_PARENT_MODES) { mode = INITIAL_MODE; }
       nextMode(PARENTS_BASE, CNT_PARENT_MODES);
     }
-    
-    touchDisplay.CheckForButtonPress(p);
+   */
+    if(sinceLastPointTested > 250){
+      touchDisplay.CheckForButtonPress(p);
+      sinceLastPointTested = 0;
+    }
   }
 }
 
@@ -281,8 +283,8 @@ void parent_fcb()
       {"Navigate", Toggle, false, fcb_settings_mode, 0}
     };
      
-    #define PID_NAV_CNT 4
-    ButtonSetup navButtons[PID_NAV_CNT] { 
+    const uint8_t pid_nav_cnt = 4;
+    ButtonSetup navButtons[pid_nav_cnt] { 
       {"Load", Navigation, false, nav_not_implemented_callback, 0}, 
       {"Save", Navigation, false, nav_not_implemented_callback, 0}, 
       {"Defaults", Navigation, false, nav_not_implemented_callback, 0}, 
@@ -290,7 +292,7 @@ void parent_fcb()
     };
 
     char* title = "Settings";
-    BuildScreen(title, fcbButtons, FCB_BTN_CNT, navButtons, PID_NAV_CNT, PARENT_MODE_FCB);
+    BuildScreen(title, fcbButtons, FCB_BTN_CNT, navButtons, pid_nav_cnt, PARENT_MODE_FCB);
 }
 
 // msp fcb buttons to modes
@@ -343,7 +345,7 @@ int nav_not_implemented_callback(char* label) {}
 void pid_editor_left() {
   char* title = "Settings - PID Left";
 
-  #define TOP_BTN_CNT 4
+  const uint8_t TOP_BTN_CNT = 4;
   ButtonSetup topButtons[TOP_BTN_CNT] { 
     {"K", Edit, false, leftKedit, pids[0].K}, 
     {"P", Edit, false, leftPedit, pids[0].P}, 
@@ -351,8 +353,8 @@ void pid_editor_left() {
     {"D", Edit, true, leftDedit, pids[0].D} 
   };
   
-  #define NAV_BTN_CNT 4
-  ButtonSetup navButtons[PID_NAV_CNT] { 
+  const uint8_t NAV_BTN_CNT = 4;
+  ButtonSetup navButtons[NAV_BTN_CNT] { 
     {"Back", Navigation, false, fcb_edit_back}, 
     {"Enable", Toggle, fcbPidLeft, LeftPidToggleEnable}, 
     {"Previous", Navigation, false, nextPidMode}, 
@@ -366,7 +368,7 @@ void pid_editor_left() {
 void pid_editor_right() {
   char* title = "Settings - PID Right";
 
-  #define TOP_BTN_CNT 4
+  const uint8_t TOP_BTN_CNT = 4;
   ButtonSetup topButtons[TOP_BTN_CNT] { 
     {"K", Edit, false, rightKedit, pids[1].K}, 
     {"P", Edit, false, rightPedit, pids[1].P}, 
@@ -374,8 +376,8 @@ void pid_editor_right() {
     {"D", Edit, true, rightDedit, pids[1].D} 
   };
   
-  #define NAV_BTN_CNT 4
-  ButtonSetup navButtons[PID_NAV_CNT] { 
+  const uint8_t NAV_BTN_CNT = 4;
+  ButtonSetup navButtons[NAV_BTN_CNT] { 
     {"Back", Navigation, false, fcb_edit_back}, 
     {"Enable", Toggle, fcbPidRight, RightPidToggleEnable}, 
     {"Previous", Navigation, false, nextPidMode}, 
@@ -389,15 +391,15 @@ void pid_editor_right() {
 void sonar_editor_left() {
   char* title = "Settings - Sonar Left";
 
-  #define TOP_BTN_CNT 3
+  const uint8_t TOP_BTN_CNT = 3;
   ButtonSetup topButtons[TOP_BTN_CNT] { 
     {"Low", Edit, false, sonar_left_low_edit, sonarLeft.low}, 
     {"High", Edit, false, sonar_left_high_edit, sonarLeft.high}, 
     {"Ping", Value, true, nullptr, sonarLeft.reading}
   };
   
-  #define NAV_BTN_CNT 4
-  ButtonSetup navButtons[PID_NAV_CNT] { 
+  const uint8_t NAV_BTN_CNT = 4;
+  ButtonSetup navButtons[NAV_BTN_CNT] { 
     {"Back", Navigation, false, fcb_edit_back}, 
     {"Enable", Toggle, sonarLeft.enabled, sonar_left_enable}, 
     {"Previous", Navigation, false, sonar_next_mode}, 
@@ -411,15 +413,15 @@ void sonar_editor_left() {
 void sonar_editor_right(){
   char* title = "Settings - Sonar Right";
 
-  #define TOP_BTN_CNT 3
+  const uint8_t TOP_BTN_CNT = 3;
   ButtonSetup topButtons[TOP_BTN_CNT] { 
     {"Low", Edit, false, sonar_right_low_edit, sonarRight.low},
     {"High", Edit, false, sonar_right_high_edit, sonarRight.high},
     {"Ping", Value, true, nullptr, sonarRight.reading}
   };
   
-  #define NAV_BTN_CNT 4
-  ButtonSetup navButtons[PID_NAV_CNT] { 
+  const uint8_t NAV_BTN_CNT = 4;
+  ButtonSetup navButtons[NAV_BTN_CNT] { 
     {"Back", Navigation, false, fcb_edit_back}, 
     {"Enable", Toggle, sonarRight.enabled, sonar_right_enable}, 
     {"Previous", Navigation, false, sonar_next_mode}, 
@@ -517,16 +519,16 @@ void parent_runscreen()
 
     while (mode == PARENT_MODE_RUNSCREEN)
     {
-      TSPoint p;
+      TS_Point p = touchDisplay.waitOneTouch(); // Wait touch
   
-      delay(50); //debounce
-      p = touchDisplay.waitOneTouch(); // Wait touch
-  
-      if (p.y < (TS_MINY-5)) {
-        nextMode(PARENTS_BASE, CNT_PARENT_MODES);
+//      if (p.y < (TS_MINY-5)) {
+//        nextMode(PARENTS_BASE, CNT_PARENT_MODES);
+//      }
+
+      if(sinceLastPointTested > 250){
+        touchDisplay.CheckForButtonPress(p);
+        sinceLastPointTested = 0;
       }
-      
-      touchDisplay.CheckForButtonPress(p);
     }
 }
 
@@ -540,15 +542,11 @@ void parant_arbitrate()
 
   while (mode == PARENT_MODE_ARBITRATE)
   {
-    TSPoint p;
-    
-    delay(250); //debounce
-    p = touchDisplay.waitOneTouch(); // Wait touch
-    
-      if (p.y < (TS_MINY-5)) {
-        nextMode(PARENTS_BASE, CNT_PARENT_MODES);
-      }
-  }  
+    TS_Point p = touchDisplay.waitOneTouch(); // Wait touch
+//    if (p.y < (TS_MINY-5)) {
+//      nextMode(PARENTS_BASE, CNT_PARENT_MODES);
+//    }
+  }
 }
 
 int leftKedit(char* label){
@@ -642,14 +640,12 @@ int rightDedit(char* label){
 int LeftPidToggleEnable(char* label)
 {  
   fcbPidLeft = !fcbPidLeft;
-  delay(200);
   return fcbPidLeft;
 }
 
 int RightPidToggleEnable(char* label)
 {
   fcbPidRight = !fcbPidRight;
-  delay(200);
   return fcbPidRight;
 }
 

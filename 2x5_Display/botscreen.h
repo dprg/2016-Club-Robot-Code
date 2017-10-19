@@ -7,10 +7,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 #ifndef _BOTSCREEN_H
 #define _BOTSCREEN_H
-
-#include <SPFD5408_Adafruit_GFX.h>    // Core graphics library
-#include <SPFD5408_Adafruit_TFTLCD.h> // Hardware-specific library
-#include <SPFD5408_TouchScreen.h>     // Touch library
+#include <SPI.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_ILI9341.h>
+#include <Adafruit_STMPE610.h>
 //#include <SD.h>                       // SD Card library -- commented out, not enough RAM available requires ~ 800 bytes RAM
 #include "defines.h"
 #include "bottypes.h"
@@ -41,7 +41,7 @@ class BotScreen {
 
     void // Button functions
       AddButton(const ScreenButton& button),
-      CheckForButtonPress(TSPoint p),
+      CheckForButtonPress(TS_Point p),
       DrawButton(const char* title),
       DrawButtons(),
       DrawBorder(uint16_t borderSize, uint16_t color);
@@ -51,7 +51,7 @@ class BotScreen {
     void ClearBottomButtons();
 
     // in memory settings
-    bool InitializeSettings();
+    void InitializeSettings();
     int SaveSetting(char* key, int value, byte precision);
     int GetSetting(char* key);
     byte GetPrecision(char* key);
@@ -61,7 +61,7 @@ class BotScreen {
     void UpdateStatus(int value, int textSize, StatusLine line);
 
     // Touch screen read
-    TSPoint waitOneTouch();
+    TS_Point waitOneTouch();
 
     // wrapped TFT calls
     void 
@@ -83,8 +83,8 @@ class BotScreen {
 
   private: //////////////////////// PRIVATE METHODS //////////////////////// 
     // Mapped points from TS to rotated soordinates
-    uint16_t mapXPoint(TSPoint p),
-      mapYPoint(TSPoint p);
+    uint16_t mapXPoint(TS_Point p),
+      mapYPoint(TS_Point p);
 
     //  Buttom functions
     void StartNewButtonLine();
@@ -108,8 +108,8 @@ class BotScreen {
     // last border size
     uint8_t _borderSize;
     // display libs
-    Adafruit_TFTLCD *_tft;    
-    TouchScreen *_ts;
+    Adafruit_ILI9341 *_tft;    
+    Adafruit_STMPE610 *_ts;
 
     // meta arrays
     ButtonMeta buttonMeta[MAX_BUTTONS];
