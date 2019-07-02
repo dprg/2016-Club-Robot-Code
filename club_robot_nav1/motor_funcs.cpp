@@ -72,14 +72,13 @@ void init_motor_driver_shield()
   }
 }
 
+// Purpose: Turn specified motor off
+// Output:
+//  - set motor drive pins to 'brake mode'
 void motorOff(int motor)
 {
-  // Initialize braked
-  for (int i = 0; i < 2; i++)
-  {
-    digitalWrite(inApin[i], LOW);
-    digitalWrite(inBpin[i], LOW);
-  }
+  digitalWrite(inApin[motor], LOW);
+  digitalWrite(inBpin[motor], LOW);
   analogWrite(pwmpin[motor], 0);
 }
 
