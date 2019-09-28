@@ -107,5 +107,5 @@ void  read_data (uint8_t num_of_data_val, int data_array[])
 
 void initialize_comm ()
 {
-	Serial.begin(155720);
+	Serial.begin(155200);
 }
